@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#176b50">
+<title>Plastic Quest｜七天減塑挑戰</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f7ef;color:#203c30}
+header{background:#176b50;color:white;padding:25px 18px;border-radius:0 0 25px 25px}
+header h1{margin:0 0 8px;font-size:27px}
+header p{margin:0;line-height:1.6}
+main{max-width:650px;margin:auto;padding:16px}
+.card{background:white;border-radius:18px;padding:18px;margin-bottom:15px;box-shadow:0 3px 12px #244d3210}
+h2{font-size:19px;margin:0 0 14px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#e9f5e8;padding:15px;border-radius:14px}
+.stat small{display:block;color:#587565;margin-bottom:7px}
+.stat strong{font-size:25px;color:#176b50}
+label{display:block;font-weight:600;margin:14px 0 7px}
+input{width:100%;padding:12px;border:1px solid #cbd9ce;border-radius:10px;font-size:16px;background:white}
+button{border:0;border-radius:12px;padding:13px 16px;font-size:16px;font-weight:700;cursor:pointer}
+.primary{width:100%;background:#176b50;color:white;margin-top:17px}
+.secondary{background:#e5f2e4;color:#176b50}
+.muted{color:#688071;font-size:13px;line-height:1.6}
+.progress{height:12px;background:#e5eee5;border-radius:20px;overflow:hidden;margin:12px 0}
+.progress div{height:100%;width:0;background:#49a66d;transition:width .3s}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.day{background:#f0f5ef;border-radius:10px;text-align:center;padding:10px 2px;font-size:12px}
+.day.done{background:#d8f2d7;color:#176b50;font-weight:700}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.badge-card{background:#f3f7f1;border-radius:12px;padding:12px 5px;text-align:center;font-size:12px}
+.badge-card .emoji{font-size:27px;display:block;margin-bottom:5px}
+.locked{opacity:.38;filter:grayscale(1)}
+#message{margin-top:12px;font-size:14px;color:#176b50}
+footer{text-align:center;color:#789080;font-size:12px;padding:10px 20px 30px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌿 Plastic Quest</h1>
+  <p>7-Day Less Plastic Challenge<br>每天一點改變，累積更好的環境。</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>🎮 我的減塑任務</h2>
+    <p id="welcome">歡迎加入七天減塑挑戰！</p>
+    <label for="nickname">你的挑戰者暱稱</label>
+    <input id="nickname" maxlength="20" placeholder="例如：Green Hero">
+    <p class="muted">請使用暱稱，不要填寫電話、學號或其他個人敏感資料。</p>
+    <div class="progress"><div id="progressBar"></div></div>
+    <p id="progressText">已完成 0 / 7 天</p>
+    <div class="days" id="days"></div>
+  </section>
+
+  <section class="card">
+    <h2>📝 今日減塑紀錄</h2>
+    <p id="todayLabel"></p>
+    <label for="straws">今天少用幾根塑膠吸管？</label>
+    <input id="straws" type="number" min="0" max="999" value="0" inputmode="numeric">
+    <label for="bags">今天少用幾個塑膠袋？</label>
+    <input id="bags" type="number" min="0" max="999" value="0" inputmode="numeric">
+    <button class="primary" id="saveBtn">🌱 儲存今日紀錄</button>
+    <div id="message" role="status"></div>
+    <p class="muted">請記錄相較於自己平常的使用情況，今天實際少使用的數量。每天可修改當天紀錄。</p>
+  </section>
+
+  <section class="card">
+    <h2>📊 我的成果</h2>
+    <div class="stats">
+      <div class="stat"><small>少用吸管</small><strong id="totalStraws">0</strong></div>
+      <div class="stat"><small>少用塑膠袋</small><strong id="totalBags">0</strong></div>
+      <div class="stat"><small>累積積分</small><strong id="points">0</strong></div>
+      <div class="stat"><small>完成天數</small><strong id="completed">0 / 7</strong></div>
+    </div>
+    <p class="muted">積分依已記錄的減塑數量計算，每少用一件計 1 分。</p>
+  </section>
+
+  <section class="card">
+    <h2>🏅 我的徽章收藏</h2>
+    <div class="badges" id="badges"></div>
+  </section>
+
+  <section class="card">
+    <h2>📅 每日紀錄</h2>
+    <div id="history" class="muted">完成每日紀錄後，成果會顯示在這裡。</div>
+    <button class="secondary" id="exportBtn" style="width:100%;margin-top:15px">下載我的紀錄 CSV</button>
+  </section>
+
+  <section class="card">
+    <h2>🌏 挑戰小提醒</h2>
+    <p>出門前想一想：今天能不能少用一根吸管，或少拿一個塑膠袋？每一個小選擇，都能成為改變的一部分。</p>
+  </section>
+</main>
+<footer>Plastic Quest · 個人七天減塑挑戰</footer>
+
+<script>
+const KEY = "plasticQuestDemoV1";
+const today = () => {
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+};
+const load = () => {
+  try { return JSON.parse(localStorage.getItem(KEY)) || {nickname:"",records:{}}; }
+  catch(e) { return {nickname:"",records:{}}; }
+};
+let data = load();
+const $ = id => document.getElementById(id);
+const dateLabel = date => new Date(date+"T12:00:00").toLocaleDateString("zh-TW",{month:"numeric",day:"numeric"});
+const records = () => Object.entries(data.records).sort((a,b)=>a[0].localeCompare(b[0]));
+function dayNumber(date){
+  const all = records().map(x=>x[0]);
+  if(!all.length) return 0;
+  const start = new Date(all[0]+"T12:00:00");
+  const current = new Date(date+"T12:00:00");
+  return Math.floor((current-start)/86400000)+1;
+}
+function render(){
+  const all = records();
+  const count = Math.min(7,new Set(all.map(x=>x[0])).size);
+  const straws = all.reduce((s,x)=>s+Number(x[1].straws||0),0);
+  const bags = all.reduce((s,x)=>s+Number(x[1].bags||0),0);
+  $("nickname").value = data.nickname || "";
+  $("welcome").textContent = data.nickname ? "你好，"+data.nickname+"！繼續完成你的減塑任務吧。" : "歡迎加入七天減塑挑戰！";
+  $("todayLabel").textContent = "日期："+today();
+  $("totalStraws").textContent = straws;
+  $("totalBags").textContent = bags;
+  $("points").textContent = straws+bags;
+  $("completed").textContent = count+" / 7";
+  $("progressText").textContent = "已完成 "+count+" / 7 天";
+  $("progressBar").style.width = (count/7*100)+"%";
+  $("days").innerHTML = Array.from({length:7},(_,i)=>{
+    const dates = all.map(x=>x[0]);
+    const done = dates.length && dates[i];
+    return '<div class="day '+(done?'done':'')+'">'+(done?'✓':'○')+'<br>第'+(i+1)+'天</div>';
+  }).join("");
+  const badges = [
+    ["🌱","初次紀錄",count>=1],
+    ["🍃","連續前進",count>=3],
+    ["🌳","七天達成",count>=7],
+    ["🥤","吸管減量",straws>=5],
+    ["🛍️","減袋達人",bags>=5],
+    ["🌎","減塑英雄",straws+bags>=20]
+  ];
+  $("badges").innerHTML = badges.map(b=>'<div class="badge-card '+(b[2]?'':'locked')+'"><span class="emoji">'+b[0]+'</span><strong>'+b[1]+'</strong><br>'+(b[2]?'已解鎖':'尚未解鎖')+'</div>').join("");
+  $("history").innerHTML = all.length ? all.slice().reverse().map(([date,r])=>
+    '<p>📅 '+date+'：吸管 '+r.straws+' 根、塑膠袋 '+r.bags+' 個</p>'
+  ).join("") : "完成每日紀錄後，成果會顯示在這裡。";
+  const r = data.records[today()];
+  $("straws").value = r ? r.straws : 0;
+  $("bags").value = r ? r.bags : 0;
+}
+$("nickname").addEventListener("change",()=>{
+  data.nickname = $("nickname").value.trim().slice(0,20);
+  localStorage.setItem(KEY,JSON.stringify(data)); render();
+});
+$("saveBtn").addEventListener("click",()=>{
+  const s = Number($("straws").value), b = Number($("bags").value);
+  if(!Number.isInteger(s)||!Number.isInteger(b)||s<0||b<0||s>999||b>999){
+    $("message").textContent = "請輸入 0 到 999 的整數。"; return;
+  }
+  data.nickname = $("nickname").value.trim().slice(0,20);
+  data.records[today()] = {straws:s,bags:b};
+  localStorage.setItem(KEY,JSON.stringify(data));
+  $("message").textContent = "今日紀錄已儲存在這個瀏覽器！下一步會設定線上共同資料庫。";
+  render();
+});
+$("exportBtn").addEventListener("click",()=>{
+  const rows = [["日期","少用吸管(根)","少用塑膠袋(個)"],...records().map(([d,r])=>[d,r.straws,r.bags])];
+  const csv = "\uFEFF"+rows.map(row=>row.join(",")).join("\r\n");
+  const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href=url; a.download="plastic-quest-records.csv"; a.click();
+  URL.revokeObjectURL(url);
+});
+render();
+</script>
+</body>
+</html>
