@@ -180,12 +180,29 @@ $("saveBtn").addEventListener("click", async ()=>{
   try {
     const { error } = await supabaseClient
       .from("daily_records")
-      .insert({
+      .upsert({
         nickname: data.nickname,
         record_date: today(),
         straws_saved: s,
         bags_saved: b
+      }, {
+        onConflict: "nickname,record_date"
       });
+
+    if(error) throw error;
+
+    data.records[today()] = {straws:s,bags:b};
+    localStorage.setItem(KEY,JSON.stringify(data));
+
+    $("message").textContent = "成功！今日紀錄已更新至雲端。";
+    render();
+
+  } catch(error) {
+    $("message").textContent = "儲存失敗：" + error.message;
+  } finally {
+    $("saveBtn").disabled = false;
+  }
+});
 
     if(error) throw error;
 
