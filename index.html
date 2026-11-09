@@ -204,20 +204,7 @@ $("saveBtn").addEventListener("click", async ()=>{
   }
 });
 
-    if(error) throw error;
 
-    data.records[today()] = {straws:s,bags:b};
-    localStorage.setItem(KEY,JSON.stringify(data));
-
-    $("message").textContent = "成功！今日紀錄已儲存至雲端。";
-    render();
-
-  } catch(error) {
-    $("message").textContent = "儲存失敗：" + error.message;
-  } finally {
-    $("saveBtn").disabled = false;
-  }
-});
 $("exportBtn").addEventListener("click",()=>{
   const rows = [["日期","少用吸管(根)","少用塑膠袋(個)"],...records().map(([d,r])=>[d,r.straws,r.bags])];
   const csv = "\uFEFF"+rows.map(row=>row.join(",")).join("\r\n");
