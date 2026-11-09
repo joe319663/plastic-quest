@@ -224,7 +224,48 @@ render();
     SUPABASE_KEY
   );
 
-  console.log("Supabase 已初始化");
+    console.log("Supabase 已初始化");
+
+  // 從雲端載入玩家紀錄
+  async function loadCloudRecords() {
+    const nickname = data.nickname;
+
+    if (!nickname) return;
+
+    $("message").textContent = "正在載入雲端紀錄...";
+
+    try {
+      const { data: cloudRecords, error } = await supabaseClient
+        .from("daily_records")
+        .select("record_date, straws_saved, bags_saved")
+        .eq("nickname", nickname)
+        .order("record_date", { ascending: true });
+
+      if (error) throw error;
+
+      cloudRecords.forEach(record => {
+        data.records[record.record_date] = {
+          straws: record.straws_saved,
+          bags: record.bags_saved
+        };
+      });
+
+      localStorage.setItem(KEY, JSON.stringify(data));
+      render();
+
+      $("message").textContent = "雲端紀錄載入成功！";
+
+    } catch (error) {
+      $("message").textContent = "載入失敗：" + error.message;
+    }
+  }
+
+  // 網頁開啟時載入
+  loadCloudRecords();
+
+  // 玩家更換暱稱時，也重新載入該玩家紀錄
+  $("nickname").addEventListener("change", loadCloudRecords);
+</script>
 </script>
 </body>
 </html>
