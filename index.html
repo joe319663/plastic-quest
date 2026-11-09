@@ -217,55 +217,92 @@ render();
 </script>
 <script>
   const SUPABASE_URL = "https://sidwuvfdzqhohhgtbmfq.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_BUVBbYbLp8PNU5WTf5YPkw_Ltjlq5uX";
+const SUPABASE_KEY = "保留你原本的完整 Publishable Key";
 
-  const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-    console.log("Supabase 已初始化");
+console.log("Supabase 已初始化");
 
-  // 從雲端載入玩家紀錄
-  async function loadCloudRecords() {
-    const nickname = data.nickname;
+// 將本機舊紀錄補進雲端，再載入完整雲端紀錄
+async function loadCloudRecords() {
+  const nickname = data.nickname;
 
-    if (!nickname) return;
+  if (!nickname) {
+    $("message").textContent = "請先輸入暱稱。";
+    return;
+  }
 
-    $("message").textContent = "正在載入雲端紀錄...";
+  $("message").textContent = "正在整理並同步歷史紀錄...";
 
-    try {
-      const { data: cloudRecords, error } = await supabaseClient
+  try {
+    // 1. 取得 Safari 原本保存的紀錄
+    const localRows = Object.entries(data.records || {})
+      .map(([date, record]) => ({
+        nickname: nickname,
+        record_date: date,
+        straws_saved: Number(record.straws),
+        bags_saved: Number(record.bags)
+      }))
+      .filter(record =>
+        Number.isInteger(record.straws_saved) &&
+        Number.isInteger(record.bags_saved) &&
+        record.straws_saved >= 0 &&
+        record.bags_saved >= 0
+      );
+
+    // 2. 只補上雲端缺少的日期，不覆蓋已有紀錄
+    if (localRows.length > 0) {
+      const { error: uploadError } = await supabaseClient
+        .from("daily_records")
+        .upsert(localRows, {
+          onConflict: "nickname,record_date",
+          ignoreDuplicates: true
+        });
+
+      if (uploadError) throw uploadError;
+    }
+
+    // 3. 從雲端讀取這位玩家的所有紀錄
+    const { data: cloudRecords, error: readError } =
+      await supabaseClient
         .from("daily_records")
         .select("record_date, straws_saved, bags_saved")
         .eq("nickname", nickname)
         .order("record_date", { ascending: true });
 
-      if (error) throw error;
+    if (readError) throw readError;
 
-      cloudRecords.forEach(record => {
-        data.records[record.record_date] = {
-          straws: record.straws_saved,
-          bags: record.bags_saved
-        };
-      });
+    // 4. 更新本機紀錄
+    data.records = {};
 
-      localStorage.setItem(KEY, JSON.stringify(data));
-      render();
+    cloudRecords.forEach(record => {
+      data.records[record.record_date] = {
+        straws: record.straws_saved,
+        bags: record.bags_saved
+      };
+    });
 
-      $("message").textContent = "雲端紀錄載入成功！";
+    localStorage.setItem(KEY, JSON.stringify(data));
 
-    } catch (error) {
-      $("message").textContent = "載入失敗：" + error.message;
-    }
+    render();
+
+    $("message").textContent =
+      "成功！歷史紀錄已同步，現在可以跨裝置使用。";
+
+  } catch (error) {
+    $("message").textContent = "同步失敗：" + error.message;
+    console.error(error);
   }
+}
 
-  // 網頁開啟時載入
-  loadCloudRecords();
+// 網頁開啟時載入
+loadCloudRecords();
 
-  // 玩家更換暱稱時，也重新載入該玩家紀錄
-  $("nickname").addEventListener("change", loadCloudRecords);
-</script>
+// 更換暱稱時重新載入
+$("nickname").addEventListener("change", loadCloudRecords);
 </script>
 </body>
 </html>
