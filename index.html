@@ -189,23 +189,6 @@ render();
   );
 
   console.log("Supabase 已初始化");
-
-  (async () => {
-  const { error } = await supabaseClient
-    .from("daily_records")
-    .insert({
-      nickname: "PQ連線測試",
-      record_date: "2026-11-09",
-      straws_saved: 1,
-      bags_saved: 1
-    });
-
-  if (error) {
-    alert("測試失敗：" + error.message);
-  } else {
-    alert("成功！資料已寫入 Supabase！");
-  }
-})();
 </script>
 </body>
 </html>
