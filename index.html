@@ -158,16 +158,48 @@ $("nickname").addEventListener("change",()=>{
   data.nickname = $("nickname").value.trim().slice(0,20);
   localStorage.setItem(KEY,JSON.stringify(data)); render();
 });
-$("saveBtn").addEventListener("click",()=>{
-  const s = Number($("straws").value), b = Number($("bags").value);
+$("saveBtn").addEventListener("click", async ()=>{
+  const s = Number($("straws").value);
+  const b = Number($("bags").value);
+
   if(!Number.isInteger(s)||!Number.isInteger(b)||s<0||b<0||s>999||b>999){
-    $("message").textContent = "請輸入 0 到 999 的整數。"; return;
+    $("message").textContent = "請輸入 0 到 999 的整數。";
+    return;
   }
+
   data.nickname = $("nickname").value.trim().slice(0,20);
-  data.records[today()] = {straws:s,bags:b};
-  localStorage.setItem(KEY,JSON.stringify(data));
-  $("message").textContent = "今日紀錄已儲存在這個瀏覽器！下一步會設定線上共同資料庫。";
-  render();
+
+  if(!data.nickname){
+    $("message").textContent = "請先輸入暱稱。";
+    return;
+  }
+
+  $("saveBtn").disabled = true;
+  $("message").textContent = "正在儲存雲端紀錄...";
+
+  try {
+    const { error } = await supabaseClient
+      .from("daily_records")
+      .insert({
+        nickname: data.nickname,
+        record_date: today(),
+        straws_saved: s,
+        bags_saved: b
+      });
+
+    if(error) throw error;
+
+    data.records[today()] = {straws:s,bags:b};
+    localStorage.setItem(KEY,JSON.stringify(data));
+
+    $("message").textContent = "成功！今日紀錄已儲存至雲端。";
+    render();
+
+  } catch(error) {
+    $("message").textContent = "儲存失敗：" + error.message;
+  } finally {
+    $("saveBtn").disabled = false;
+  }
 });
 $("exportBtn").addEventListener("click",()=>{
   const rows = [["日期","少用吸管(根)","少用塑膠袋(個)"],...records().map(([d,r])=>[d,r.straws,r.bags])];
