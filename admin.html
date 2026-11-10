@@ -39,8 +39,6 @@ button{
 }
 button:disabled{opacity:.5}
 button.light{background:#e7efe9;color:#176b50}
-button.tab{background:#e7efe9;color:#176b50}
-button.tab.active{background:#176b50;color:white}
 .status{font-size:12px;color:#718278;margin-top:10px;line-height:1.6}
 .hidden{display:none!important}
 .grid{
@@ -64,28 +62,13 @@ button.tab.active{background:#176b50;color:white}
   font-size:12px;line-height:1.7;margin-bottom:16px
 }
 .chart-wrap{height:310px;position:relative}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
-.tabs button{padding:9px 13px}
 .table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:440px;font-size:13px}
+table{width:100%;border-collapse:collapse;min-width:380px;font-size:13px}
 th,td{
   padding:11px 8px;text-align:left;
   border-bottom:1px solid #edf0ed;white-space:nowrap
 }
 th{color:#718278}
-.tag{
-  display:inline-block;padding:4px 8px;border-radius:20px;
-  font-size:11px;background:#e5f3e9;color:#176b50
-}
-.tag.demo{background:#fff0d9;color:#a36c18}
-.dot{
-  display:inline-block;width:9px;height:9px;
-  border-radius:50%;margin-right:5px
-}
-.legend{
-  display:flex;gap:15px;flex-wrap:wrap;
-  font-size:12px;margin:0 0 14px
-}
 .topline{
   display:flex;justify-content:space-between;
   align-items:center;gap:12px;flex-wrap:wrap
@@ -131,8 +114,7 @@ th{color:#718278}
   </section>
 
   <div class="notice">
-    本儀表板呈現 Plastic Quest 平台累積紀錄，
-    包含系統測試與模擬資料，供專案成果展示及功能驗證使用。
+    本儀表板呈現 Plastic Quest 平台累積紀錄，包含系統測試與模擬資料，供專案成果展示及功能驗證使用。
   </div>
 
   <div class="section-title">
@@ -164,9 +146,9 @@ th{color:#718278}
 
   <section class="panel" style="margin-top:22px">
     <h2>📈 每日減塑成果趨勢</h2>
-    <div class="legend">
-      <span><i class="dot" style="background:#279b70"></i>吸管減量</span>
-      <span><i class="dot" style="background:#4285c5"></i>塑膠袋減量</span>
+    <div style="display:flex;gap:15px;flex-wrap:wrap;font-size:12px;margin-bottom:14px">
+      <span>🟢 吸管減量</span>
+      <span>🔵 塑膠袋減量</span>
     </div>
     <div class="chart-wrap">
       <canvas id="dailyChart"></canvas>
@@ -178,11 +160,6 @@ th{color:#718278}
 
   <section class="panel">
     <h2>📝 玩家每日紀錄</h2>
-    <div class="tabs">
-      <button class="tab active" data-filter="all">全部紀錄</button>
-      <button class="tab" data-filter="real">一般資料</button>
-      <button class="tab" data-filter="demo">模擬資料</button>
-    </div>
     <div class="table-wrap">
       <table>
         <thead>
@@ -191,11 +168,10 @@ th{color:#718278}
             <th>日期</th>
             <th>吸管減量</th>
             <th>塑膠袋減量</th>
-            <th>類型</th>
           </tr>
         </thead>
         <tbody id="recentRows">
-          <tr><td colspan="5">尚無資料</td></tr>
+          <tr><td colspan="4">尚無資料</td></tr>
         </tbody>
       </table>
     </div>
@@ -225,7 +201,6 @@ let adminPassword="";
 let refreshTimer=null;
 let chart=null;
 let recentData=[];
-let currentFilter="all";
 
 const $=id=>document.getElementById(id);
 
@@ -321,23 +296,15 @@ function renderRecent(){
   const tbody=$("recentRows");
   tbody.replaceChildren();
 
-  let rows=recentData;
-
-  if(currentFilter==="real"){
-    rows=rows.filter(x=>!x.is_demo);
-  }else if(currentFilter==="demo"){
-    rows=rows.filter(x=>x.is_demo);
-  }
-
-  if(!rows.length){
+  if(!recentData.length){
     const tr=document.createElement("tr");
     const td=document.createElement("td");
-    td.colSpan=5;
-    td.textContent="目前沒有符合條件的紀錄";
+    td.colSpan=4;
+    td.textContent="目前沒有紀錄";
     tr.appendChild(td);
     tbody.appendChild(tr);
   }else{
-    rows.forEach(item=>{
+    recentData.forEach(item=>{
       const tr=document.createElement("tr");
 
       const values=[
@@ -353,19 +320,12 @@ function renderRecent(){
         tr.appendChild(td);
       });
 
-      const typeCell=document.createElement("td");
-      const tag=document.createElement("span");
-      tag.className=item.is_demo?"tag demo":"tag";
-      tag.textContent=item.is_demo?"模擬":"一般";
-      typeCell.appendChild(tag);
-      tr.appendChild(typeCell);
-
       tbody.appendChild(tr);
     });
   }
 
   $("recordCount").textContent=
-    "目前顯示 "+rows.length+" 筆｜最多載入最近 30 筆";
+    "目前顯示 "+recentData.length+" 筆｜最近紀錄";
 }
 
 function renderData(rawData){
@@ -478,18 +438,6 @@ $("logoutBtn").addEventListener("click",()=>{
   $("dashboard").classList.add("hidden");
   $("loginPanel").classList.remove("hidden");
   $("loginStatus").textContent="已登出";
-});
-
-document.querySelectorAll("[data-filter]").forEach(button=>{
-  button.addEventListener("click",()=>{
-    currentFilter=button.dataset.filter;
-
-    document.querySelectorAll("[data-filter]").forEach(b=>{
-      b.classList.toggle("active",b===button);
-    });
-
-    renderRecent();
-  });
 });
 
 $("password").addEventListener("keydown",event=>{
