@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#176b50">
+<title>Plastic Quest｜管理後台</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  padding:20px;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#f1f5f2;
+  color:#203b30;
+}
+.container{max-width:1000px;margin:auto}
+header{
+  background:#176b50;color:white;
+  padding:22px;border-radius:18px;
+  margin-bottom:20px;
+}
+header h1{margin:0 0 8px;font-size:23px}
+header p{margin:0;opacity:.85;font-size:13px}
+.panel{
+  background:white;padding:20px;
+  border-radius:16px;margin-bottom:18px;
+  box-shadow:0 3px 12px #183b3010;
+}
+input{
+  width:100%;padding:13px;
+  border:1px solid #ccd8d0;
+  border-radius:10px;font-size:16px;
+  margin:10px 0;
+}
+button{
+  border:0;border-radius:10px;
+  padding:12px 18px;
+  background:#176b50;color:white;
+  font-size:15px;font-weight:bold;
+}
+button.secondary{background:#e7efe9;color:#176b50}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.stat{
+  padding:18px;border-radius:14px;
+  background:#f0f7f2;
+}
+.stat small{color:#65786c}
+.stat strong{
+  display:block;font-size:30px;
+  margin:8px 0;color:#176b50;
+}
+h2{font-size:18px;margin:0 0 16px}
+.status{font-size:13px;color:#668071;margin-top:10px}
+.chart-wrap{height:280px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{
+  padding:11px 7px;
+  border-bottom:1px solid #edf0ed;
+  text-align:left;
+}
+th{color:#607469}
+.table-wrap{overflow-x:auto}
+.hidden{display:none!important}
+@media(min-width:650px){
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <h1>🌱 Plastic Quest</h1>
+  <p>減塑挑戰｜管理數據儀表板</p>
+</header>
+
+<section class="panel" id="loginPanel">
+  <h2>🔐 管理者登入</h2>
+  <p>請輸入管理密碼以查看減塑統計資料。</p>
+  <input id="password" type="password"
+    placeholder="輸入管理密碼">
+  <button id="loginBtn">登入管理後台</button>
+  <div class="status" id="loginStatus"></div>
+</section>
+
+<main id="dashboard" class="hidden">
+
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div>
+        <h2 style="margin-bottom:5px">📊 減塑成果總覽</h2>
+        <div class="status" id="updateTime">等待資料更新</div>
+      </div>
+      <div>
+        <button class="secondary" id="refreshBtn">重新整理</button>
+        <button id="logoutBtn">登出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stat">
+      <small>參與玩家</small>
+      <strong id="players">0</strong>
+      <small>位玩家</small>
+    </div>
+    <div class="stat">
+      <small>累積紀錄</small>
+      <strong id="records">0</strong>
+      <small>筆紀錄</small>
+    </div>
+    <div class="stat">
+      <small>減少塑膠吸管</small>
+      <strong id="straws">0</strong>
+      <small>支</small>
+    </div>
+    <div class="stat">
+      <small>減少塑膠袋</small>
+      <strong id="bags">0</strong>
+      <small>個</small>
+    </div>
+  </div>
+
+  <section class="panel" style="margin-top:18px">
+    <h2>📈 每日減塑成果趨勢</h2>
+    <div class="chart-wrap">
+      <canvas id="dailyChart"></canvas>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>📝 最近玩家紀錄</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>玩家暱稱</th>
+            <th>日期</th>
+            <th>吸管減量</th>
+            <th>塑膠袋減量</th>
+          </tr>
+        </thead>
+        <tbody id="recentRows">
+          <tr><td colspan="4">尚無資料</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="status" id="dataStatus">
+    每 15 秒自動更新一次
+  </div>
+
+</main>
+</div>
+
+<script>
+const SUPABASE_URL =
+  "https://sidwuvfdzqhohhgtbmfq.supabase.co";
+
+const SUPABASE_KEY =
+  "請貼上你的Publishable key";
+
+const client = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let adminPassword = "";
+let refreshTimer = null;
+let chart = null;
+
+const $ = id => document.getElementById(id);
+
+function showNumber(id,value){
+  $(id).textContent =
+    Number(value || 0).toLocaleString("zh-TW");
+}
+
+function drawChart(daily){
+  const labels = daily.map(x => x.record_date);
+
+  const straws = daily.map(x => Number(x.straws || 0));
+  const bags = daily.map(x => Number(x.bags || 0));
+
+  if(chart) chart.destroy();
+
+  chart = new Chart($("dailyChart"),{
+    type:"bar",
+    data:{
+      labels,
+      datasets:[
+        {
+          label:"吸管減量",
+          data:straws,
+          backgroundColor:"#279b70",
+          borderRadius:5
+        },
+        {
+          label:"塑膠袋減量",
+          data:bags,
+          backgroundColor:"#e5ae4d",
+          borderRadius:5
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        y:{beginAtZero:true}
+      }
+    }
+  });
+}
+
+function renderRecent(rows){
+  const tbody = $("recentRows");
+  tbody.replaceChildren();
+
+  if(!rows || rows.length === 0){
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 4;
+    td.textContent = "目前沒有玩家紀錄";
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
+  rows.forEach(item=>{
+    const tr = document.createElement("tr");
+
+    [
+      item.nickname,
+      item.record_date,
+      Number(item.straws_saved || 0) + " 支",
+      Number(item.bags_saved || 0) + " 個"
+    ].forEach(value=>{
+      const td = document.createElement("td");
+      td.textContent = value ?? "";
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+async function loadDashboard(){
+  $("dataStatus").textContent = "正在更新資料……";
+
+  const {data,error} = await client.rpc(
+    "get_admin_dashboard",
+    {p_password:adminPassword}
+  );
+
+  if(error){
+    $("dataStatus").textContent =
+      "讀取失敗：" + error.message;
+    return;
+  }
+
+  showNumber("players",data.player_count);
+  showNumber("records",data.record_count);
+  showNumber("straws",data.total_straws);
+  showNumber("bags",data.total_bags);
+
+  drawChart(data.daily || []);
+  renderRecent(data.recent || []);
+
+  $("updateTime").textContent =
+    "最後更新：" + new Date().toLocaleTimeString("zh-TW");
+
+  $("dataStatus").textContent =
+    "✓ 資料更新成功｜每 15 秒自動更新";
+}
+
+$("loginBtn").addEventListener("click",async()=>{
+  const password = $("password").value;
+
+  if(!password){
+    $("loginStatus").textContent = "請輸入管理密碼";
+    return;
+  }
+
+  adminPassword = password;
+  $("loginBtn").disabled = true;
+  $("loginStatus").textContent = "正在驗證……";
+
+  const {data,error} = await client.rpc(
+    "get_admin_dashboard",
+    {p_password:adminPassword}
+  );
+
+  $("loginBtn").disabled = false;
+
+  if(error){
+    adminPassword = "";
+    $("loginStatus").textContent =
+      "登入失敗，請確認密碼及資料庫設定。";
+    return;
+  }
+
+  $("loginPanel").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+
+  showNumber("players",data.player_count);
+  showNumber("records",data.record_count);
+  showNumber("straws",data.total_straws);
+  showNumber("bags",data.total_bags);
+
+  drawChart(data.daily || []);
+  renderRecent(data.recent || []);
+
+  $("updateTime").textContent =
+    "最後更新：" + new Date().toLocaleTimeString("zh-TW");
+
+  $("dataStatus").textContent =
+    "✓ 資料更新成功｜每 15 秒自動更新";
+
+  if(refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(loadDashboard,15000);
+});
+
+$("refreshBtn").addEventListener("click",loadDashboard);
+
+$("logoutBtn").addEventListener("click",()=>{
+  adminPassword = "";
+
+  if(refreshTimer) clearInterval(refreshTimer);
+  if(chart) chart.destroy();
+
+  $("password").value = "";
+  $("dashboard").classList.add("hidden");
+  $("loginPanel").classList.remove("hidden");
+  $("loginStatus").textContent = "已登出";
+});
+</script>
+
+</body>
+</html>
