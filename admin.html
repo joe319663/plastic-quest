@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#145c45">
+<meta name="theme-color" content="#176b50">
 <title>Plastic Quest｜管理中心</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,104 +13,86 @@
 *{box-sizing:border-box}
 body{
   margin:0;padding:18px;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:#f3f6f3;color:#203b30
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#f1f5f2;color:#203b30
 }
-.container{max-width:1100px;margin:auto}
+.container{max-width:1050px;margin:auto}
 header{
   background:linear-gradient(135deg,#145c45,#278565);
-  color:white;padding:26px 22px;border-radius:20px;
-  margin-bottom:18px;box-shadow:0 8px 24px #145c4520
+  color:white;padding:25px;border-radius:19px;margin-bottom:18px;
+  box-shadow:0 5px 18px #176b5018
 }
-header h1{margin:0 0 8px;font-size:26px}
+header h1{margin:0 0 7px;font-size:26px}
 header p{margin:0;font-size:13px;opacity:.88}
-.eyebrow{font-size:11px;letter-spacing:2px;opacity:.8;margin-bottom:9px}
 .panel{
-  background:white;padding:20px;border-radius:17px;
-  margin-bottom:17px;box-shadow:0 3px 15px #183b300b
+  background:white;padding:19px;border-radius:17px;
+  margin-bottom:16px;box-shadow:0 3px 12px #183b3010
 }
-h2{font-size:17px;margin:0 0 16px}
+h2{font-size:18px;margin:0 0 15px}
 input{
-  width:100%;padding:14px;border:1px solid #d5dfd8;
-  border-radius:11px;font-size:16px;margin:10px 0
+  width:100%;padding:13px;border:1px solid #ccd8d0;
+  border-radius:10px;font-size:16px;margin:10px 0
 }
 button{
   border:0;border-radius:10px;padding:12px 17px;
-  background:#176b50;color:white;font-size:14px;font-weight:700;
-  cursor:pointer
+  background:#176b50;color:white;font-size:14px;font-weight:bold
 }
 button:disabled{opacity:.5}
-button.light{background:#e9f1eb;color:#176b50}
-button.active{background:#176b50;color:white}
-button:not(.active).tab{background:#e9f1eb;color:#176b50}
+button.light{background:#e7efe9;color:#176b50}
+button.tab{background:#e7efe9;color:#176b50}
+button.tab.active{background:#176b50;color:white}
 .status{font-size:12px;color:#718278;margin-top:10px;line-height:1.6}
 .hidden{display:none!important}
-.section-title{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:10px;margin:23px 2px 12px
-}
-.section-title h2{margin:0}
 .grid{
   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:11px
+  gap:12px
 }
 .stat{
-  padding:17px;border-radius:14px;
+  padding:18px;border-radius:14px;
   background:#edf6f0;border:1px solid #e0eee4
 }
-.stat.demo{
-  background:#fff7eb;border-color:#f5e8d1
-}
-.stat.total{
-  background:#eaf1f9;border-color:#dce8f4
-}
-.stat small{font-size:12px;color:#68796e}
 .stat strong{
-  display:block;font-size:29px;margin:8px 0 5px;
+  display:block;font-size:31px;margin:8px 0 5px;
   color:#176b50;font-weight:800
 }
-.stat.demo strong{color:#b47b28}
-.stat.total strong{color:#356b9e}
-.stat span{font-size:11px;color:#78877d}
+.stat small{color:#66766c;font-size:12px}
+.stat span{font-size:11px;color:#7b887f}
+.section-title{margin:23px 2px 12px}
 .notice{
-  padding:13px 15px;border-radius:12px;
-  background:#fff7e9;color:#8a6429;
-  font-size:12px;line-height:1.7;margin-bottom:17px
+  padding:13px 15px;border-radius:11px;
+  background:#fff6e8;color:#92651f;
+  font-size:12px;line-height:1.7;margin-bottom:16px
 }
-.legend{
-  display:flex;gap:13px;flex-wrap:wrap;
-  font-size:11px;margin-bottom:14px;color:#68796e
+.chart-wrap{height:310px;position:relative}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
+.tabs button{padding:9px 13px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:440px;font-size:13px}
+th,td{
+  padding:11px 8px;text-align:left;
+  border-bottom:1px solid #edf0ed;white-space:nowrap
 }
+th{color:#718278}
+.tag{
+  display:inline-block;padding:4px 8px;border-radius:20px;
+  font-size:11px;background:#e5f3e9;color:#176b50
+}
+.tag.demo{background:#fff0d9;color:#a36c18}
 .dot{
   display:inline-block;width:9px;height:9px;
   border-radius:50%;margin-right:5px
 }
-.chart-wrap{height:300px;position:relative}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.tabs button{padding:9px 13px;font-size:12px}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:460px;font-size:13px}
-th,td{
-  padding:12px 9px;text-align:left;
-  border-bottom:1px solid #edf0ed;white-space:nowrap
+.legend{
+  display:flex;gap:15px;flex-wrap:wrap;
+  font-size:12px;margin:0 0 14px
 }
-th{color:#718278;font-size:12px}
-.tag{
-  display:inline-block;padding:4px 9px;border-radius:20px;
-  font-size:11px;background:#e5f3e9;color:#176b50
-}
-.tag.demo{background:#fff0d9;color:#a36c18}
 .topline{
   display:flex;justify-content:space-between;
   align-items:center;gap:12px;flex-wrap:wrap
 }
-.update{font-size:12px;color:#718278}
-.empty{text-align:center;color:#87948b;padding:22px}
-footer{text-align:center;color:#8a988e;font-size:11px;padding:12px}
 @media(min-width:700px){
-  body{padding:28px}
   .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-  header{padding:30px}
+  body{padding:25px}
 }
 </style>
 </head>
@@ -119,7 +101,6 @@ footer{text-align:center;color:#8a988e;font-size:11px;padding:12px}
 <div class="container">
 
 <header>
-  <div class="eyebrow">SUSTAINABLE CAMPUS PROJECT</div>
   <h1>🌱 Plastic Quest</h1>
   <p>七天減塑挑戰｜管理數據中心</p>
 </header>
@@ -127,9 +108,9 @@ footer{text-align:center;color:#8a988e;font-size:11px;padding:12px}
 <section class="panel" id="loginPanel">
   <h2>🔐 管理者登入</h2>
   <p style="font-size:13px;color:#718278">
-    請輸入管理密碼，查看減塑挑戰的統計成果。
+    輸入管理密碼以查看平台累積成果。
   </p>
-  <input id="password" type="password" placeholder="請輸入管理密碼">
+  <input id="password" type="password" placeholder="管理密碼">
   <button id="loginBtn">登入管理中心</button>
   <div class="status" id="loginStatus"></div>
 </section>
@@ -139,8 +120,8 @@ footer{text-align:center;color:#8a988e;font-size:11px;padding:12px}
   <section class="panel">
     <div class="topline">
       <div>
-        <h2 style="margin:0 0 5px">📊 管理數據總覽</h2>
-        <div class="update" id="updateTime">等待資料更新</div>
+        <h2 style="margin:0 0 5px">📊 成果總覽</h2>
+        <div class="status" id="updateTime">尚未更新</div>
       </div>
       <div style="display:flex;gap:7px">
         <button class="light" id="refreshBtn">↻ 更新</button>
@@ -150,87 +131,47 @@ footer{text-align:center;color:#8a988e;font-size:11px;padding:12px}
   </section>
 
   <div class="notice">
-    <strong>資料說明</strong><br>
-    一般資料：資料庫中非模擬標記的紀錄，未必代表已驗證的真實參與者。<br>
-    模擬展示資料：為系統展示與測試建立，不代表實際參與成果。
+    本儀表板呈現 Plastic Quest 平台累積紀錄，
+    包含系統測試與模擬資料，供專案成果展示及功能驗證使用。
   </div>
 
   <div class="section-title">
-    <h2>👥 參與狀況</h2>
+    <h2>👥 累積參與成果</h2>
   </div>
 
   <div class="grid">
-    <div class="stat total">
-      <small>玩家總數</small>
+    <div class="stat">
+      <small>累積參與玩家</small>
       <strong id="totalPlayers">—</strong>
-      <span>位｜包含模擬玩家</span>
+      <span>位</span>
     </div>
     <div class="stat">
-      <small>一般玩家</small>
-      <strong id="realPlayers">—</strong>
-      <span>位｜非模擬資料</span>
-    </div>
-    <div class="stat demo">
-      <small>模擬玩家</small>
-      <strong id="demoPlayers">—</strong>
-      <span>位｜展示用途</span>
-    </div>
-    <div class="stat total">
-      <small>紀錄總筆數</small>
+      <small>累積紀錄</small>
       <strong id="totalRecords">—</strong>
-      <span>筆｜包含模擬紀錄</span>
+      <span>筆</span>
     </div>
-  </div>
-
-  <div class="section-title">
-    <h2>♻️ 減塑成果</h2>
-  </div>
-
-  <div class="grid">
-    <div class="stat total">
-      <small>吸管減量總計</small>
+    <div class="stat">
+      <small>吸管減量</small>
       <strong id="totalStraws">—</strong>
-      <span>支｜一般資料＋模擬資料</span>
+      <span>支</span>
     </div>
-    <div class="stat total">
-      <small>塑膠袋減量總計</small>
+    <div class="stat">
+      <small>塑膠袋減量</small>
       <strong id="totalBags">—</strong>
-      <span>個｜一般資料＋模擬資料</span>
-    </div>
-    <div class="stat">
-      <small>一般資料吸管減量</small>
-      <strong id="realStraws">—</strong>
-      <span>支｜非模擬資料</span>
-    </div>
-    <div class="stat">
-      <small>一般資料塑膠袋減量</small>
-      <strong id="realBags">—</strong>
-      <span>個｜非模擬資料</span>
-    </div>
-    <div class="stat demo">
-      <small>模擬吸管減量</small>
-      <strong id="demoStraws">—</strong>
-      <span>支｜展示用途</span>
-    </div>
-    <div class="stat demo">
-      <small>模擬塑膠袋減量</small>
-      <strong id="demoBags">—</strong>
-      <span>個｜展示用途</span>
+      <span>個</span>
     </div>
   </div>
 
   <section class="panel" style="margin-top:22px">
     <h2>📈 每日減塑成果趨勢</h2>
     <div class="legend">
-      <span><i class="dot" style="background:#279b70"></i>一般吸管</span>
-      <span><i class="dot" style="background:#e5ae4d"></i>模擬吸管</span>
-      <span><i class="dot" style="background:#4285c5"></i>一般塑膠袋</span>
-      <span><i class="dot" style="background:#b58ad8"></i>模擬塑膠袋</span>
+      <span><i class="dot" style="background:#279b70"></i>吸管減量</span>
+      <span><i class="dot" style="background:#4285c5"></i>塑膠袋減量</span>
     </div>
     <div class="chart-wrap">
       <canvas id="dailyChart"></canvas>
-      <div id="chartError" class="empty hidden">
-        圖表載入失敗，請確認網路連線後重新整理。
+      <div id="chartError" class="hidden status">
+        圖表載入失敗，請確認網路連線。
       </div>
     </div>
   </section>
@@ -250,11 +191,11 @@ footer{text-align:center;color:#8a988e;font-size:11px;padding:12px}
             <th>日期</th>
             <th>吸管減量</th>
             <th>塑膠袋減量</th>
-            <th>資料類型</th>
+            <th>類型</th>
           </tr>
         </thead>
         <tbody id="recentRows">
-          <tr><td colspan="5" class="empty">載入中……</td></tr>
+          <tr><td colspan="5">尚無資料</td></tr>
         </tbody>
       </table>
     </div>
@@ -262,11 +203,10 @@ footer{text-align:center;color:#8a988e;font-size:11px;padding:12px}
   </section>
 
   <div class="status" id="dataStatus">
-    系統登入後每 15 秒自動更新一次。
+    每 15 秒自動更新一次。
   </div>
 </main>
 
-<footer>Plastic Quest｜七天減塑挑戰管理中心</footer>
 </div>
 
 <script>
@@ -276,35 +216,34 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_BUVBbYbLp8PNU5WTf5YPkw_Ltjlq5uX";
 
-const client = window.supabase.createClient(
+const client=window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
 
-let adminPassword = "";
-let refreshTimer = null;
-let chart = null;
-let recentData = [];
-let currentFilter = "all";
+let adminPassword="";
+let refreshTimer=null;
+let chart=null;
+let recentData=[];
+let currentFilter="all";
 
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
 
 function number(id,value){
-  $(id).textContent =
-    Number(value ?? 0).toLocaleString("zh-TW");
+  $(id).textContent=
+    Number(value??0).toLocaleString("zh-TW");
 }
 
 function normalizeData(data){
-  if(typeof data === "string"){
-    try{data=JSON.parse(data)}
-    catch(e){throw new Error("資料格式無法解析")}
+  if(typeof data==="string"){
+    data=JSON.parse(data);
   }
 
-  if(Array.isArray(data) && data.length===1){
+  if(Array.isArray(data)&&data.length===1){
     data=data[0];
   }
 
-  if(!data || typeof data!=="object"){
+  if(!data||typeof data!=="object"){
     throw new Error("資料庫沒有回傳有效資料");
   }
 
@@ -320,14 +259,12 @@ function normalizeData(data){
   );
 
   if(missing.length){
-    throw new Error(
-      "資料欄位不完整："+missing.join(", ")
-    );
+    throw new Error("缺少資料欄位："+missing.join(", "));
   }
 
-  if(!Array.isArray(data.daily) ||
+  if(!Array.isArray(data.daily)||
      !Array.isArray(data.recent)){
-    throw new Error("每日趨勢或紀錄清單格式不正確");
+    throw new Error("每日趨勢或紀錄格式錯誤");
   }
 
   return data;
@@ -345,32 +282,24 @@ function drawChart(rows){
 
   const datasets=[
     {
-      label:"一般吸管",
-      data:rows.map(x=>Number(x.real_straws||0)),
+      label:"吸管減量",
+      data:rows.map(x=>
+        Number(x.real_straws||0)+Number(x.demo_straws||0)
+      ),
       backgroundColor:"#279b70",
       borderRadius:5
     },
     {
-      label:"模擬吸管",
-      data:rows.map(x=>Number(x.demo_straws||0)),
-      backgroundColor:"#e5ae4d",
-      borderRadius:5
-    },
-    {
-      label:"一般塑膠袋",
-      data:rows.map(x=>Number(x.real_bags||0)),
+      label:"塑膠袋減量",
+      data:rows.map(x=>
+        Number(x.real_bags||0)+Number(x.demo_bags||0)
+      ),
       backgroundColor:"#4285c5",
-      borderRadius:5
-    },
-    {
-      label:"模擬塑膠袋",
-      data:rows.map(x=>Number(x.demo_bags||0)),
-      backgroundColor:"#b58ad8",
       borderRadius:5
     }
   ];
 
-  if(chart) chart.destroy();
+  if(chart)chart.destroy();
 
   chart=new Chart($("dailyChart"),{
     type:"bar",
@@ -379,16 +308,10 @@ function drawChart(rows){
       responsive:true,
       maintainAspectRatio:false,
       interaction:{mode:"index",intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{enabled:true}
-      },
+      plugins:{legend:{display:false}},
       scales:{
         x:{ticks:{maxRotation:45,minRotation:0}},
-        y:{
-          beginAtZero:true,
-          ticks:{precision:0}
-        }
+        y:{beginAtZero:true,ticks:{precision:0}}
       }
     }
   });
@@ -410,7 +333,6 @@ function renderRecent(){
     const tr=document.createElement("tr");
     const td=document.createElement("td");
     td.colSpan=5;
-    td.className="empty";
     td.textContent="目前沒有符合條件的紀錄";
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -449,27 +371,22 @@ function renderRecent(){
 function renderData(rawData){
   const data=normalizeData(rawData);
 
-  const realPlayers=Number(data.real_players||0);
-  const demoPlayers=Number(data.demo_players||0);
-  const realRecords=Number(data.real_records||0);
-  const demoRecords=Number(data.demo_records||0);
+  const totalPlayers=
+    Number(data.real_players||0)+Number(data.demo_players||0);
 
-  const realStraws=Number(data.real_straws||0);
-  const realBags=Number(data.real_bags||0);
-  const demoStraws=Number(data.demo_straws||0);
-  const demoBags=Number(data.demo_bags||0);
+  const totalRecords=
+    Number(data.real_records||0)+Number(data.demo_records||0);
 
-  number("totalPlayers",realPlayers+demoPlayers);
-  number("realPlayers",realPlayers);
-  number("demoPlayers",demoPlayers);
-  number("totalRecords",realRecords+demoRecords);
+  const totalStraws=
+    Number(data.real_straws||0)+Number(data.demo_straws||0);
 
-  number("totalStraws",realStraws+demoStraws);
-  number("totalBags",realBags+demoBags);
-  number("realStraws",realStraws);
-  number("realBags",realBags);
-  number("demoStraws",demoStraws);
-  number("demoBags",demoBags);
+  const totalBags=
+    Number(data.real_bags||0)+Number(data.demo_bags||0);
+
+  number("totalPlayers",totalPlayers);
+  number("totalRecords",totalRecords);
+  number("totalStraws",totalStraws);
+  number("totalBags",totalBags);
 
   drawChart(data.daily);
   recentData=data.recent;
@@ -485,19 +402,19 @@ async function fetchDashboard(){
     {p_password:adminPassword}
   );
 
-  if(error) throw new Error(error.message);
+  if(error)throw new Error(error.message);
 
   renderData(data);
 }
 
 async function loadDashboard(){
-  $("dataStatus").textContent="正在讀取資料庫……";
+  $("dataStatus").textContent="正在更新資料……";
   $("refreshBtn").disabled=true;
 
   try{
     await fetchDashboard();
     $("dataStatus").textContent=
-      "✓ 資料更新成功｜每 15 秒自動同步一次";
+      "✓ 更新成功｜每 15 秒自動同步資料庫";
   }catch(error){
     $("dataStatus").textContent=
       "⚠ 更新失敗："+error.message;
@@ -515,7 +432,7 @@ $("loginBtn").addEventListener("click",async()=>{
   }
 
   $("loginBtn").disabled=true;
-  $("loginStatus").textContent="正在驗證資料庫……";
+  $("loginStatus").textContent="正在驗證……";
 
   try{
     const {data,error}=await client.rpc(
@@ -523,22 +440,23 @@ $("loginBtn").addEventListener("click",async()=>{
       {p_password:password}
     );
 
-    if(error) throw new Error(error.message);
+    if(error)throw new Error(error.message);
 
     const checkedData=normalizeData(data);
 
     adminPassword=password;
+
     $("loginPanel").classList.add("hidden");
     $("dashboard").classList.remove("hidden");
 
     renderData(checkedData);
 
-    if(refreshTimer) clearInterval(refreshTimer);
+    if(refreshTimer)clearInterval(refreshTimer);
+
     refreshTimer=setInterval(loadDashboard,15000);
 
     $("dataStatus").textContent=
-      "✓ 登入成功｜每 15 秒自動同步一次";
-
+      "✓ 登入成功｜每 15 秒自動同步";
   }catch(error){
     $("loginStatus").textContent=
       "登入或讀取失敗："+error.message;
@@ -552,8 +470,8 @@ $("refreshBtn").addEventListener("click",loadDashboard);
 $("logoutBtn").addEventListener("click",()=>{
   adminPassword="";
 
-  if(refreshTimer) clearInterval(refreshTimer);
-  if(chart) chart.destroy();
+  if(refreshTimer)clearInterval(refreshTimer);
+  if(chart)chart.destroy();
 
   chart=null;
   $("password").value="";
@@ -575,9 +493,8 @@ document.querySelectorAll("[data-filter]").forEach(button=>{
 });
 
 $("password").addEventListener("keydown",event=>{
-  if(event.key==="Enter") $("loginBtn").click();
+  if(event.key==="Enter")$("loginBtn").click();
 });
 </script>
 </body>
 </html>
-
