@@ -4,187 +4,243 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#176b50">
-<title>Plastic Quest｜管理後台</title>
+<meta name="theme-color" content="#145c45">
+<title>Plastic Quest｜管理中心</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 *{box-sizing:border-box}
 body{
   margin:0;padding:18px;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-  background:#f1f5f2;color:#203b30
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#f3f6f3;color:#203b30
 }
-.container{max-width:1050px;margin:auto}
+.container{max-width:1100px;margin:auto}
 header{
-  background:#176b50;color:white;
-  padding:23px;border-radius:18px;margin-bottom:18px
+  background:linear-gradient(135deg,#145c45,#278565);
+  color:white;padding:26px 22px;border-radius:20px;
+  margin-bottom:18px;box-shadow:0 8px 24px #145c4520
 }
-header h1{margin:0 0 7px;font-size:24px}
-header p{margin:0;font-size:13px;opacity:.85}
+header h1{margin:0 0 8px;font-size:26px}
+header p{margin:0;font-size:13px;opacity:.88}
+.eyebrow{font-size:11px;letter-spacing:2px;opacity:.8;margin-bottom:9px}
 .panel{
-  background:white;padding:18px;border-radius:16px;
-  margin-bottom:16px;box-shadow:0 3px 12px #183b3010
+  background:white;padding:20px;border-radius:17px;
+  margin-bottom:17px;box-shadow:0 3px 15px #183b300b
 }
-h2{font-size:18px;margin:0 0 15px}
+h2{font-size:17px;margin:0 0 16px}
 input{
-  width:100%;padding:13px;border:1px solid #ccd8d0;
-  border-radius:10px;font-size:16px;margin:10px 0
+  width:100%;padding:14px;border:1px solid #d5dfd8;
+  border-radius:11px;font-size:16px;margin:10px 0
 }
 button{
   border:0;border-radius:10px;padding:12px 17px;
-  background:#176b50;color:white;font-size:14px;font-weight:bold
+  background:#176b50;color:white;font-size:14px;font-weight:700;
+  cursor:pointer
 }
 button:disabled{opacity:.5}
-button.light{background:#e7efe9;color:#176b50}
-.status{font-size:12px;color:#718278;margin-top:10px}
+button.light{background:#e9f1eb;color:#176b50}
+button.active{background:#176b50;color:white}
+button:not(.active).tab{background:#e9f1eb;color:#176b50}
+.status{font-size:12px;color:#718278;margin-top:10px;line-height:1.6}
 .hidden{display:none!important}
+.section-title{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin:23px 2px 12px
+}
+.section-title h2{margin:0}
 .grid{
   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
   gap:11px
 }
-.stat{padding:16px;border-radius:13px;background:#f0f7f2}
-.stat.demo{background:#fff5e8}
-.stat small{color:#66766c;font-size:12px}
-.stat strong{
-  display:block;font-size:29px;margin:7px 0;color:#176b50
+.stat{
+  padding:17px;border-radius:14px;
+  background:#edf6f0;border:1px solid #e0eee4
 }
-.stat.demo strong{color:#bd8127}
-.stat span{font-size:11px;color:#7b887f}
+.stat.demo{
+  background:#fff7eb;border-color:#f5e8d1
+}
+.stat.total{
+  background:#eaf1f9;border-color:#dce8f4
+}
+.stat small{font-size:12px;color:#68796e}
+.stat strong{
+  display:block;font-size:29px;margin:8px 0 5px;
+  color:#176b50;font-weight:800
+}
+.stat.demo strong{color:#b47b28}
+.stat.total strong{color:#356b9e}
+.stat span{font-size:11px;color:#78877d}
+.notice{
+  padding:13px 15px;border-radius:12px;
+  background:#fff7e9;color:#8a6429;
+  font-size:12px;line-height:1.7;margin-bottom:17px
+}
 .legend{
-  display:flex;gap:15px;flex-wrap:wrap;
-  font-size:12px;margin:0 0 14px
+  display:flex;gap:13px;flex-wrap:wrap;
+  font-size:11px;margin-bottom:14px;color:#68796e
 }
 .dot{
   display:inline-block;width:9px;height:9px;
   border-radius:50%;margin-right:5px
 }
-.chart-wrap{height:310px;position:relative}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
-.tabs button{padding:9px 13px}
-.tabs button.active{background:#176b50;color:white}
-.tabs button:not(.active){background:#e7efe9;color:#176b50}
+.chart-wrap{height:300px;position:relative}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{padding:9px 13px;font-size:12px}
 .table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:440px;font-size:13px}
-th,td{padding:11px 8px;text-align:left;border-bottom:1px solid #edf0ed}
-th{color:#718278}
+table{width:100%;border-collapse:collapse;min-width:460px;font-size:13px}
+th,td{
+  padding:12px 9px;text-align:left;
+  border-bottom:1px solid #edf0ed;white-space:nowrap
+}
+th{color:#718278;font-size:12px}
 .tag{
-  display:inline-block;padding:4px 8px;border-radius:20px;
+  display:inline-block;padding:4px 9px;border-radius:20px;
   font-size:11px;background:#e5f3e9;color:#176b50
 }
 .tag.demo{background:#fff0d9;color:#a36c18}
-.notice{
-  padding:12px;border-radius:10px;background:#fff6e8;
-  color:#92651f;font-size:12px;line-height:1.6;margin-bottom:14px
+.topline{
+  display:flex;justify-content:space-between;
+  align-items:center;gap:12px;flex-wrap:wrap
 }
+.update{font-size:12px;color:#718278}
+.empty{text-align:center;color:#87948b;padding:22px}
+footer{text-align:center;color:#8a988e;font-size:11px;padding:12px}
 @media(min-width:700px){
+  body{padding:28px}
   .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-  body{padding:25px}
+  header{padding:30px}
 }
 </style>
 </head>
+
 <body>
 <div class="container">
 
 <header>
+  <div class="eyebrow">SUSTAINABLE CAMPUS PROJECT</div>
   <h1>🌱 Plastic Quest</h1>
-  <p>減塑挑戰｜管理數據儀表板</p>
+  <p>七天減塑挑戰｜管理數據中心</p>
 </header>
 
 <section class="panel" id="loginPanel">
   <h2>🔐 管理者登入</h2>
-  <p>輸入管理密碼以查看統計資料。</p>
-  <input id="password" type="password" placeholder="管理密碼">
-  <button id="loginBtn">登入管理後台</button>
+  <p style="font-size:13px;color:#718278">
+    請輸入管理密碼，查看減塑挑戰的統計成果。
+  </p>
+  <input id="password" type="password" placeholder="請輸入管理密碼">
+  <button id="loginBtn">登入管理中心</button>
   <div class="status" id="loginStatus"></div>
 </section>
 
 <main id="dashboard" class="hidden">
 
   <section class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div class="topline">
       <div>
-        <h2 style="margin:0 0 5px">📊 數據總覽</h2>
-        <div class="status" id="updateTime">尚未更新</div>
+        <h2 style="margin:0 0 5px">📊 管理數據總覽</h2>
+        <div class="update" id="updateTime">等待資料更新</div>
       </div>
       <div style="display:flex;gap:7px">
-        <button class="light" id="refreshBtn">重新整理</button>
+        <button class="light" id="refreshBtn">↻ 更新</button>
         <button id="logoutBtn">登出</button>
       </div>
     </div>
   </section>
 
   <div class="notice">
-    注意：正式資料代表實際紀錄；展示資料為系統測試與畫面展示用途，不代表真實參與成果。
+    <strong>資料說明</strong><br>
+    一般資料：資料庫中非模擬標記的紀錄，未必代表已驗證的真實參與者。<br>
+    模擬展示資料：為系統展示與測試建立，不代表實際參與成果。
   </div>
 
-  <h2>👥 玩家參與狀況</h2>
+  <div class="section-title">
+    <h2>👥 參與狀況</h2>
+  </div>
+
   <div class="grid">
-    <div class="stat">
-      <small>正式玩家</small>
-      <strong id="realPlayers">0</strong>
-      <span>位｜真實資料</span>
-    </div>
-    <div class="stat demo">
-      <small>展示玩家</small>
-      <strong id="demoPlayers">0</strong>
-      <span>位｜模擬資料</span>
+    <div class="stat total">
+      <small>玩家總數</small>
+      <strong id="totalPlayers">—</strong>
+      <span>位｜包含模擬玩家</span>
     </div>
     <div class="stat">
-      <small>正式紀錄</small>
-      <strong id="realRecords">0</strong>
-      <span>筆｜真實資料</span>
+      <small>一般玩家</small>
+      <strong id="realPlayers">—</strong>
+      <span>位｜非模擬資料</span>
     </div>
     <div class="stat demo">
-      <small>展示紀錄</small>
-      <strong id="demoRecords">0</strong>
-      <span>筆｜模擬資料</span>
+      <small>模擬玩家</small>
+      <strong id="demoPlayers">—</strong>
+      <span>位｜展示用途</span>
+    </div>
+    <div class="stat total">
+      <small>紀錄總筆數</small>
+      <strong id="totalRecords">—</strong>
+      <span>筆｜包含模擬紀錄</span>
     </div>
   </div>
 
-  <h2 style="margin-top:22px">♻️ 減塑成果統計</h2>
+  <div class="section-title">
+    <h2>♻️ 減塑成果</h2>
+  </div>
+
   <div class="grid">
-    <div class="stat">
-      <small>正式吸管減量</small>
-      <strong id="realStraws">0</strong>
-      <span>支</span>
+    <div class="stat total">
+      <small>吸管減量總計</small>
+      <strong id="totalStraws">—</strong>
+      <span>支｜一般資料＋模擬資料</span>
+    </div>
+    <div class="stat total">
+      <small>塑膠袋減量總計</small>
+      <strong id="totalBags">—</strong>
+      <span>個｜一般資料＋模擬資料</span>
     </div>
     <div class="stat">
-      <small>正式塑膠袋減量</small>
-      <strong id="realBags">0</strong>
-      <span>個</span>
+      <small>一般資料吸管減量</small>
+      <strong id="realStraws">—</strong>
+      <span>支｜非模擬資料</span>
+    </div>
+    <div class="stat">
+      <small>一般資料塑膠袋減量</small>
+      <strong id="realBags">—</strong>
+      <span>個｜非模擬資料</span>
     </div>
     <div class="stat demo">
-      <small>展示吸管減量</small>
-      <strong id="demoStraws">0</strong>
-      <span>支</span>
+      <small>模擬吸管減量</small>
+      <strong id="demoStraws">—</strong>
+      <span>支｜展示用途</span>
     </div>
     <div class="stat demo">
-      <small>展示塑膠袋減量</small>
-      <strong id="demoBags">0</strong>
-      <span>個</span>
+      <small>模擬塑膠袋減量</small>
+      <strong id="demoBags">—</strong>
+      <span>個｜展示用途</span>
     </div>
   </div>
 
-  <section class="panel" style="margin-top:20px">
+  <section class="panel" style="margin-top:22px">
     <h2>📈 每日減塑成果趨勢</h2>
     <div class="legend">
-      <span><i class="dot" style="background:#279b70"></i>正式吸管</span>
-      <span><i class="dot" style="background:#e5ae4d"></i>展示吸管</span>
-      <span><i class="dot" style="background:#4285c5"></i>正式塑膠袋</span>
-      <span><i class="dot" style="background:#b58ad8"></i>展示塑膠袋</span>
+      <span><i class="dot" style="background:#279b70"></i>一般吸管</span>
+      <span><i class="dot" style="background:#e5ae4d"></i>模擬吸管</span>
+      <span><i class="dot" style="background:#4285c5"></i>一般塑膠袋</span>
+      <span><i class="dot" style="background:#b58ad8"></i>模擬塑膠袋</span>
     </div>
     <div class="chart-wrap">
       <canvas id="dailyChart"></canvas>
+      <div id="chartError" class="empty hidden">
+        圖表載入失敗，請確認網路連線後重新整理。
+      </div>
     </div>
   </section>
 
   <section class="panel">
     <h2>📝 玩家每日紀錄</h2>
     <div class="tabs">
-      <button class="active" data-filter="all">全部</button>
-      <button data-filter="real">正式資料</button>
-      <button data-filter="demo">展示資料</button>
+      <button class="tab active" data-filter="all">全部紀錄</button>
+      <button class="tab" data-filter="real">一般資料</button>
+      <button class="tab" data-filter="demo">模擬資料</button>
     </div>
     <div class="table-wrap">
       <table>
@@ -192,13 +248,13 @@ th{color:#718278}
           <tr>
             <th>玩家暱稱</th>
             <th>日期</th>
-            <th>吸管</th>
-            <th>塑膠袋</th>
-            <th>類型</th>
+            <th>吸管減量</th>
+            <th>塑膠袋減量</th>
+            <th>資料類型</th>
           </tr>
         </thead>
         <tbody id="recentRows">
-          <tr><td colspan="5">尚無資料</td></tr>
+          <tr><td colspan="5" class="empty">載入中……</td></tr>
         </tbody>
       </table>
     </div>
@@ -206,9 +262,11 @@ th{color:#718278}
   </section>
 
   <div class="status" id="dataStatus">
-    每 15 秒自動更新一次
+    系統登入後每 15 秒自動更新一次。
   </div>
 </main>
+
+<footer>Plastic Quest｜七天減塑挑戰管理中心</footer>
 </div>
 
 <script>
@@ -233,37 +291,88 @@ const $ = id => document.getElementById(id);
 
 function number(id,value){
   $(id).textContent =
-    Number(value || 0).toLocaleString("zh-TW");
+    Number(value ?? 0).toLocaleString("zh-TW");
+}
+
+function normalizeData(data){
+  if(typeof data === "string"){
+    try{data=JSON.parse(data)}
+    catch(e){throw new Error("資料格式無法解析")}
+  }
+
+  if(Array.isArray(data) && data.length===1){
+    data=data[0];
+  }
+
+  if(!data || typeof data!=="object"){
+    throw new Error("資料庫沒有回傳有效資料");
+  }
+
+  const required=[
+    "real_players","demo_players",
+    "real_records","demo_records",
+    "real_straws","real_bags",
+    "demo_straws","demo_bags"
+  ];
+
+  const missing=required.filter(
+    key=>!(key in data)
+  );
+
+  if(missing.length){
+    throw new Error(
+      "資料欄位不完整："+missing.join(", ")
+    );
+  }
+
+  if(!Array.isArray(data.daily) ||
+     !Array.isArray(data.recent)){
+    throw new Error("每日趨勢或紀錄清單格式不正確");
+  }
+
+  return data;
 }
 
 function drawChart(rows){
-  const labels = rows.map(x => x.record_date);
-  const datasets = [
+  $("chartError").classList.add("hidden");
+
+  if(typeof Chart==="undefined"){
+    $("chartError").classList.remove("hidden");
+    return;
+  }
+
+  const labels=rows.map(x=>x.record_date);
+
+  const datasets=[
     {
-      label:"正式吸管",
+      label:"一般吸管",
       data:rows.map(x=>Number(x.real_straws||0)),
-      backgroundColor:"#279b70"
+      backgroundColor:"#279b70",
+      borderRadius:5
     },
     {
-      label:"展示吸管",
+      label:"模擬吸管",
       data:rows.map(x=>Number(x.demo_straws||0)),
-      backgroundColor:"#e5ae4d"
+      backgroundColor:"#e5ae4d",
+      borderRadius:5
     },
     {
-      label:"正式塑膠袋",
+      label:"一般塑膠袋",
       data:rows.map(x=>Number(x.real_bags||0)),
-      backgroundColor:"#4285c5"
+      backgroundColor:"#4285c5",
+      borderRadius:5
     },
     {
-      label:"展示塑膠袋",
+      label:"模擬塑膠袋",
       data:rows.map(x=>Number(x.demo_bags||0)),
-      backgroundColor:"#b58ad8"
+      backgroundColor:"#b58ad8",
+      borderRadius:5
     }
   ];
 
   if(chart) chart.destroy();
 
-  chart = new Chart($("dailyChart"),{
+  chart=new Chart($("dailyChart"),{
     type:"bar",
     data:{labels,datasets},
     options:{
@@ -276,17 +385,20 @@ function drawChart(rows){
       },
       scales:{
         x:{ticks:{maxRotation:45,minRotation:0}},
-        y:{beginAtZero:true,ticks:{precision:0}}
+        y:{
+          beginAtZero:true,
+          ticks:{precision:0}
+        }
       }
     }
   });
 }
 
 function renderRecent(){
-  const tbody = $("recentRows");
+  const tbody=$("recentRows");
   tbody.replaceChildren();
 
-  let rows = recentData;
+  let rows=recentData;
 
   if(currentFilter==="real"){
     rows=rows.filter(x=>!x.is_demo);
@@ -298,12 +410,14 @@ function renderRecent(){
     const tr=document.createElement("tr");
     const td=document.createElement("td");
     td.colSpan=5;
+    td.className="empty";
     td.textContent="目前沒有符合條件的紀錄";
     tr.appendChild(td);
     tbody.appendChild(tr);
   }else{
     rows.forEach(item=>{
       const tr=document.createElement("tr");
+
       const values=[
         item.nickname,
         item.record_date,
@@ -320,7 +434,7 @@ function renderRecent(){
       const typeCell=document.createElement("td");
       const tag=document.createElement("span");
       tag.className=item.is_demo?"tag demo":"tag";
-      tag.textContent=item.is_demo?"展示":"正式";
+      tag.textContent=item.is_demo?"模擬":"一般";
       typeCell.appendChild(tag);
       tr.appendChild(typeCell);
 
@@ -328,46 +442,68 @@ function renderRecent(){
     });
   }
 
-  $("recordCount").textContent =
-    "目前顯示 "+rows.length+" 筆（最多載入最近 30 筆）";
+  $("recordCount").textContent=
+    "目前顯示 "+rows.length+" 筆｜最多載入最近 30 筆";
 }
 
-function renderData(data){
-  number("realPlayers",data.real_players);
-  number("demoPlayers",data.demo_players);
-  number("realRecords",data.real_records);
-  number("demoRecords",data.demo_records);
+function renderData(rawData){
+  const data=normalizeData(rawData);
 
-  number("realStraws",data.real_straws);
-  number("realBags",data.real_bags);
-  number("demoStraws",data.demo_straws);
-  number("demoBags",data.demo_bags);
+  const realPlayers=Number(data.real_players||0);
+  const demoPlayers=Number(data.demo_players||0);
+  const realRecords=Number(data.real_records||0);
+  const demoRecords=Number(data.demo_records||0);
 
-  drawChart(data.daily||[]);
-  recentData=data.recent||[];
+  const realStraws=Number(data.real_straws||0);
+  const realBags=Number(data.real_bags||0);
+  const demoStraws=Number(data.demo_straws||0);
+  const demoBags=Number(data.demo_bags||0);
+
+  number("totalPlayers",realPlayers+demoPlayers);
+  number("realPlayers",realPlayers);
+  number("demoPlayers",demoPlayers);
+  number("totalRecords",realRecords+demoRecords);
+
+  number("totalStraws",realStraws+demoStraws);
+  number("totalBags",realBags+demoBags);
+  number("realStraws",realStraws);
+  number("realBags",realBags);
+  number("demoStraws",demoStraws);
+  number("demoBags",demoBags);
+
+  drawChart(data.daily);
+  recentData=data.recent;
   renderRecent();
 
-  $("updateTime").textContent =
+  $("updateTime").textContent=
     "最後更新："+new Date().toLocaleTimeString("zh-TW");
 }
 
-async function loadDashboard(){
-  $("dataStatus").textContent="正在更新資料……";
-
+async function fetchDashboard(){
   const {data,error}=await client.rpc(
     "get_admin_dashboard",
     {p_password:adminPassword}
   );
 
-  if(error){
-    $("dataStatus").textContent=
-      "更新失敗："+error.message;
-    return;
-  }
+  if(error) throw new Error(error.message);
 
   renderData(data);
-  $("dataStatus").textContent=
-    "✓ 更新成功｜每 15 秒自動讀取資料庫";
+}
+
+async function loadDashboard(){
+  $("dataStatus").textContent="正在讀取資料庫……";
+  $("refreshBtn").disabled=true;
+
+  try{
+    await fetchDashboard();
+    $("dataStatus").textContent=
+      "✓ 資料更新成功｜每 15 秒自動同步一次";
+  }catch(error){
+    $("dataStatus").textContent=
+      "⚠ 更新失敗："+error.message;
+  }
+
+  $("refreshBtn").disabled=false;
 }
 
 $("loginBtn").addEventListener("click",async()=>{
@@ -379,41 +515,47 @@ $("loginBtn").addEventListener("click",async()=>{
   }
 
   $("loginBtn").disabled=true;
-  $("loginStatus").textContent="正在驗證……";
+  $("loginStatus").textContent="正在驗證資料庫……";
 
-  const {data,error}=await client.rpc(
-    "get_admin_dashboard",
-    {p_password:password}
-  );
+  try{
+    const {data,error}=await client.rpc(
+      "get_admin_dashboard",
+      {p_password:password}
+    );
 
-  $("loginBtn").disabled=false;
+    if(error) throw new Error(error.message);
 
-  if(error){
+    const checkedData=normalizeData(data);
+
+    adminPassword=password;
+    $("loginPanel").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+
+    renderData(checkedData);
+
+    if(refreshTimer) clearInterval(refreshTimer);
+    refreshTimer=setInterval(loadDashboard,15000);
+
+    $("dataStatus").textContent=
+      "✓ 登入成功｜每 15 秒自動同步一次";
+
+  }catch(error){
     $("loginStatus").textContent=
-      "登入失敗，請確認密碼或資料庫設定。";
-    return;
+      "登入或讀取失敗："+error.message;
   }
 
-  adminPassword=password;
-  $("loginPanel").classList.add("hidden");
-  $("dashboard").classList.remove("hidden");
-
-  renderData(data);
-
-  if(refreshTimer) clearInterval(refreshTimer);
-  refreshTimer=setInterval(loadDashboard,15000);
-
-  $("dataStatus").textContent=
-    "✓ 登入成功｜每 15 秒自動更新";
+  $("loginBtn").disabled=false;
 });
 
 $("refreshBtn").addEventListener("click",loadDashboard);
 
 $("logoutBtn").addEventListener("click",()=>{
   adminPassword="";
+
   if(refreshTimer) clearInterval(refreshTimer);
   if(chart) chart.destroy();
 
+  chart=null;
   $("password").value="";
   $("dashboard").classList.add("hidden");
   $("loginPanel").classList.remove("hidden");
@@ -438,3 +580,4 @@ $("password").addEventListener("keydown",event=>{
 </script>
 </body>
 </html>
+
