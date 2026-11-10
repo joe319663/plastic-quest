@@ -39,12 +39,35 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .badge-card{background:#f3f7f1;border-radius:12px;padding:12px 5px;text-align:center;font-size:12px}
 .badge-card .emoji{font-size:27px;display:block;margin-bottom:5px}
 .locked{opacity:.38;filter:grayscale(1)}
-#message,#accountMessage{margin-top:12px;font-size:14px;color:#176b50;line-height:1.6}
+#message,#accountMessage,#drawMessage,#collectionMessage{margin-top:12px;font-size:14px;color:#176b50;line-height:1.6}
 .code-box{background:#e9f5e8;border:1px dashed #49a66d;border-radius:12px;padding:14px;margin-top:12px;word-break:break-all}
 .code-value{font-size:17px;font-weight:800;color:#176b50}
 .button-row{display:flex;gap:8px;margin-top:10px}
 .button-row button{flex:1}
 footer{text-align:center;color:#789080;font-size:12px;padding:10px 20px 30px}
+
+/* 抽卡與圖鑑 */
+.draw-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+.draw-buttons button{width:100%;min-height:55px}
+.draw-single{background:#176b50;color:white}
+.draw-ten{background:#e5f2e4;color:#176b50}
+.card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.character-card{background:#f3f7f1;border-radius:14px;padding:14px 8px;text-align:center;border:1px solid #e3ece2;min-width:0}
+.character-card .character-emoji{font-size:38px;display:block;margin-bottom:7px}
+.character-card strong{display:block;font-size:14px;margin-bottom:5px}
+.character-card p{font-size:12px;color:#688071;line-height:1.5;margin:6px 0}
+.character-card.locked-card{opacity:.5;filter:grayscale(1)}
+.rarity{display:inline-block;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:800;background:#e4eee4;color:#52735b}
+.rarity.R{background:#e3edff;color:#3863a0}
+.rarity.SR{background:#f0e5ff;color:#8150ad}
+.rarity.SSR{background:#fff0d9;color:#a66a18}
+.rarity.UR{background:#ffe5e5;color:#b43d3d}
+#drawResults{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px}
+.draw-result{background:#f3f7f1;border-radius:13px;padding:12px 7px;text-align:center}
+.draw-result .character-emoji{font-size:34px;display:block}
+.draw-result strong{display:block;font-size:13px;margin:5px 0}
+.draw-result small{font-size:11px;color:#688071}
+.collection-summary{background:#e9f5e8;padding:13px;border-radius:12px;line-height:1.7}
 </style>
 </head>
 
@@ -56,83 +79,112 @@ footer{text-align:center;color:#789080;font-size:12px;padding:10px 20px 30px}
 
 <main>
 
-  <section class="card">
-    <h2>🔐 玩家帳號</h2>
-    <p class="muted">註冊後取得專屬玩家代碼。換手機或瀏覽器時，可以用暱稱和代碼找回紀錄。</p>
+<section class="card">
+  <h2>🔐 玩家帳號</h2>
+  <p class="muted">註冊後取得專屬玩家代碼。換手機或瀏覽器時，可以用暱稱和代碼找回紀錄。</p>
 
-    <label for="accountNickname">玩家暱稱</label>
-    <input id="accountNickname" maxlength="20" placeholder="例如：Player02">
+  <label for="accountNickname">玩家暱稱</label>
+  <input id="accountNickname" maxlength="20" placeholder="例如：Player02">
 
-    <label for="recoveryCode">專屬玩家代碼</label>
-    <input id="recoveryCode" placeholder="請輸入你的玩家代碼" autocomplete="off">
+  <label for="recoveryCode">專屬玩家代碼</label>
+  <input id="recoveryCode" placeholder="請輸入你的玩家代碼" autocomplete="off">
 
-    <button class="primary" id="registerBtn">🌱 建立新玩家帳號</button>
-    <button class="secondary" id="loginBtn" style="width:100%;margin-top:10px">🔑 使用代碼登入</button>
+  <button class="primary" id="registerBtn">🌱 建立新玩家帳號</button>
+  <button class="secondary" id="loginBtn" style="width:100%;margin-top:10px">🔑 使用代碼登入</button>
 
-    <div id="accountMessage" role="status"></div>
+  <div id="accountMessage" role="status"></div>
 
-    <div id="newCodeBox" class="code-box" hidden>
-      <strong>🎉 你的專屬玩家代碼</strong>
-      <p class="muted">請立即複製並保存！這組代碼只在註冊成功時提供，遺失後無法直接查看原始代碼。</p>
-      <div id="newCode" class="code-value"></div>
-      <button class="secondary" id="copyCodeBtn" style="width:100%;margin-top:12px">複製玩家代碼</button>
-    </div>
+  <div id="newCodeBox" class="code-box" hidden>
+    <strong>🎉 你的專屬玩家代碼</strong>
+    <p class="muted">請立即複製並保存！這組代碼只在註冊成功時提供。</p>
+    <div id="newCode" class="code-value"></div>
+    <button class="secondary" id="copyCodeBtn" style="width:100%;margin-top:12px">複製玩家代碼</button>
+  </div>
 
-    <div id="loggedInBox" hidden>
-      <p id="loginStatus"></p>
-      <button class="danger" id="logoutBtn" style="width:100%">登出此帳號</button>
-    </div>
-  </section>
+  <div id="loggedInBox" hidden>
+    <p id="loginStatus"></p>
+    <button class="danger" id="logoutBtn" style="width:100%">登出此帳號</button>
+  </div>
+</section>
 
-  <section class="card">
-    <h2>🎮 我的減塑任務</h2>
-    <p id="welcome">歡迎加入七天減塑挑戰！</p>
-    <label for="nickname">你的挑戰者暱稱</label>
-    <input id="nickname" maxlength="20" placeholder="登入後顯示暱稱" disabled>
-    <p class="muted">請使用暱稱，不要填寫電話、學號或其他個人敏感資料。</p>
-    <div class="progress"><div id="progressBar"></div></div>
-    <p id="progressText">已完成 0 / 7 天</p>
-    <div class="days" id="days"></div>
-  </section>
+<section class="card">
+  <h2>🎮 我的減塑任務</h2>
+  <p id="welcome">歡迎加入七天減塑挑戰！</p>
+  <label for="nickname">你的挑戰者暱稱</label>
+  <input id="nickname" maxlength="20" placeholder="登入後顯示暱稱" disabled>
+  <p class="muted">請使用暱稱，不要填寫電話、學號或其他個人敏感資料。</p>
+  <div class="progress"><div id="progressBar"></div></div>
+  <p id="progressText">已完成 0 / 7 天</p>
+  <div class="days" id="days"></div>
+</section>
 
-  <section class="card">
-    <h2>📝 今日減塑紀錄</h2>
-    <p id="todayLabel"></p>
-    <label for="straws">今天少用幾根塑膠吸管？</label>
-    <input id="straws" type="number" min="0" max="999" value="0" inputmode="numeric">
-    <label for="bags">今天少用幾個塑膠袋？</label>
-    <input id="bags" type="number" min="0" max="999" value="0" inputmode="numeric">
-    <button class="primary" id="saveBtn" disabled>🌱 儲存今日紀錄</button>
-    <div id="message" role="status">請先登入玩家帳號。</div>
-    <p class="muted">請記錄相較於自己平常的使用情況，今天實際少使用的數量。每天可修改當天紀錄。</p>
-  </section>
+<section class="card">
+  <h2>📝 今日減塑紀錄</h2>
+  <p id="todayLabel"></p>
+  <label for="straws">今天少用幾根塑膠吸管？</label>
+  <input id="straws" type="number" min="0" max="999" value="0" inputmode="numeric">
+  <label for="bags">今天少用幾個塑膠袋？</label>
+  <input id="bags" type="number" min="0" max="999" value="0" inputmode="numeric">
+  <button class="primary" id="saveBtn" disabled>🌱 儲存今日紀錄</button>
+  <div id="message" role="status">請先登入玩家帳號。</div>
+  <p class="muted">請記錄相較於自己平常的使用情況，今天實際少使用的數量。每天可修改當天紀錄。</p>
+</section>
 
-  <section class="card">
-    <h2>📊 我的成果</h2>
-    <div class="stats">
-      <div class="stat"><small>少用吸管</small><strong id="totalStraws">0</strong></div>
-      <div class="stat"><small>少用塑膠袋</small><strong id="totalBags">0</strong></div>
-      <div class="stat"><small>累積積分</small><strong id="points">0</strong></div>
-      <div class="stat"><small>完成天數</small><strong id="completed">0 / 7</strong></div>
-    </div>
-    <p class="muted">積分依已記錄的減塑數量計算，每少用一件計 1 分。</p>
-  </section>
+<section class="card">
+  <h2>📊 我的成果</h2>
+  <div class="stats">
+    <div class="stat"><small>少用吸管</small><strong id="totalStraws">0</strong></div>
+    <div class="stat"><small>少用塑膠袋</small><strong id="totalBags">0</strong></div>
+    <div class="stat"><small>可用積分</small><strong id="points">0</strong></div>
+    <div class="stat"><small>完成天數</small><strong id="completed">0 / 7</strong></div>
+  </div>
+  <p class="muted">每少用一根吸管或一個塑膠袋，可獲得 1 分。抽卡會消耗積分。</p>
+</section>
 
-  <section class="card">
-    <h2>🏅 我的徽章收藏</h2>
-    <div class="badges" id="badges"></div>
-  </section>
+<!-- 新增：抽卡區 -->
+<section class="card">
+  <h2>🎁 環保角色召喚</h2>
+  <div class="collection-summary">
+    💰 目前可用積分：<strong id="drawPoints">0</strong> 分<br>
+    🎴 已收集角色：<strong id="collectedCount">0</strong> / 15
+  </div>
+  <p class="muted">收集環保角色，認識不同的永續行動！重複角色會轉換成該角色的碎片。</p>
 
-  <section class="card">
-    <h2>📅 每日紀錄</h2>
-    <div id="history" class="muted">登入並完成每日紀錄後，成果會顯示在這裡。</div>
-    <button class="secondary" id="exportBtn" style="width:100%;margin-top:15px">下載我的紀錄 CSV</button>
-  </section>
+  <div class="draw-buttons">
+    <button class="draw-single" id="singleDrawBtn" disabled>🎴 單抽<br>10 分</button>
+    <button class="draw-ten" id="tenDrawBtn" disabled>✨ 十連抽<br>90 分</button>
+  </div>
 
-  <section class="card">
-    <h2>🌏 挑戰小提醒</h2>
-    <p>出門前想一想：今天能不能少用一根吸管，或少拿一個塑膠袋？每一個小選擇，都能成為改變的一部分。</p>
-  </section>
+  <div id="drawMessage" role="status">請先登入玩家帳號。</div>
+  <div id="drawResults"></div>
+</section>
+
+<!-- 新增：環保角色圖鑑 -->
+<section class="card">
+  <h2>📖 環保角色圖鑑</h2>
+  <p class="muted">收集不同角色，解鎖更多環保知識。尚未取得的角色會保持鎖定。</p>
+  <div id="collectionMessage">登入後即可讀取你的收藏。</div>
+  <div class="collection-summary">
+    已解鎖：<strong id="albumCount">0</strong> / 15 張角色
+  </div>
+  <div class="card-grid" id="albumGrid"></div>
+</section>
+
+<section class="card">
+  <h2>🏅 我的徽章收藏</h2>
+  <div class="badges" id="badges"></div>
+</section>
+
+<section class="card">
+  <h2>📅 每日紀錄</h2>
+  <div id="history" class="muted">登入並完成每日紀錄後，成果會顯示在這裡。</div>
+  <button class="secondary" id="exportBtn" style="width:100%;margin-top:15px">下載我的紀錄 CSV</button>
+</section>
+
+<section class="card">
+  <h2>🌏 挑戰小提醒</h2>
+  <p>出門前想一想：今天能不能少用一根吸管，或少拿一個塑膠袋？每一個小選擇，都能成為改變的一部分。</p>
+</section>
 
 </main>
 
@@ -149,7 +201,6 @@ const supabaseClient = window.supabase.createClient(
 
 const SESSION_KEY = "plasticQuestPlayerSessionV1";
 const OLD_KEY = "plasticQuestDemoV1";
-
 const $ = id => document.getElementById(id);
 
 const today = () => {
@@ -157,12 +208,11 @@ const today = () => {
   return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 };
 
-const dateLabel = date =>
-  new Date(date+"T12:00:00").toLocaleDateString("zh-TW",{month:"numeric",day:"numeric"});
-
 let session = null;
 let data = {nickname:"",records:{}};
 let registrationCode = "";
+let pointsBalance = 0;
+let albumCards = [];
 
 function readSession(){
   try{
@@ -198,6 +248,16 @@ function records(){
   return Object.entries(data.records || {}).sort((a,b)=>a[0].localeCompare(b[0]));
 }
 
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g,char=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[char]);
+}
+
 function render(){
   const all = records();
   const count = Math.min(7,new Set(all.map(x=>x[0])).size);
@@ -212,7 +272,8 @@ function render(){
   $("todayLabel").textContent = "日期："+today();
   $("totalStraws").textContent = straws;
   $("totalBags").textContent = bags;
-  $("points").textContent = straws+bags;
+  $("points").textContent = pointsBalance;
+  $("drawPoints").textContent = pointsBalance;
   $("completed").textContent = count+" / 7";
   $("progressText").textContent = "已完成 "+count+" / 7 天";
   $("progressBar").style.width = (count/7*100)+"%";
@@ -240,7 +301,7 @@ function render(){
 
   $("history").innerHTML = all.length
     ? all.slice().reverse().map(([date,r])=>
-      '<p>📅 '+date+'：吸管 '+r.straws+' 根、塑膠袋 '+r.bags+' 個</p>'
+      '<p>📅 '+escapeHTML(date)+'：吸管 '+Number(r.straws)+' 根、塑膠袋 '+Number(r.bags)+' 個</p>'
     ).join("")
     : "完成每日紀錄後，成果會顯示在這裡。";
 
@@ -249,6 +310,8 @@ function render(){
   $("bags").value = r ? r.bags : 0;
 
   $("saveBtn").disabled = !session;
+  $("singleDrawBtn").disabled = !session || pointsBalance < 10;
+  $("tenDrawBtn").disabled = !session || pointsBalance < 90;
 }
 
 function updateAccountUI(){
@@ -259,8 +322,7 @@ function updateAccountUI(){
   $("recoveryCode").disabled = !!session;
 
   if(session){
-    $("loginStatus").textContent =
-      "目前登入玩家："+session.nickname;
+    $("loginStatus").textContent = "目前登入玩家："+session.nickname;
     $("accountMessage").textContent = "玩家帳號已登入。";
   }else{
     $("accountMessage").textContent = "請建立帳號或使用原有代碼登入。";
@@ -300,15 +362,160 @@ async function loadPlayerRecords(){
     saveCache();
     render();
 
-    $("message").textContent =
-      "雲端紀錄載入成功！";
+    $("message").textContent = "雲端紀錄載入成功！";
 
   }catch(error){
-    $("message").textContent =
-      "讀取失敗："+error.message;
+    $("message").textContent = "讀取失敗："+error.message;
     console.error(error);
   }
 }
+
+/* 讀取玩家積分與圖鑑 */
+async function loadPlayerCollection(){
+  if(!session) return;
+
+  $("collectionMessage").textContent = "正在讀取雲端圖鑑...";
+
+  try{
+    const {data:result,error} = await supabaseClient.rpc(
+      "get_player_collection",
+      {
+        p_nickname:session.nickname,
+        p_recovery_code:session.recoveryCode
+      }
+    );
+
+    if(error) throw error;
+    if(!result) throw new Error("沒有取得圖鑑資料。");
+
+    pointsBalance = Number(result.points_balance || 0);
+    albumCards = result.cards || [];
+
+    $("collectedCount").textContent = result.collected_cards || 0;
+    $("albumCount").textContent = result.collected_cards || 0;
+
+    renderAlbum();
+    render();
+
+    $("collectionMessage").textContent = "雲端圖鑑載入成功！";
+
+  }catch(error){
+    $("collectionMessage").textContent = "圖鑑讀取失敗："+error.message;
+    console.error(error);
+  }
+}
+
+/* 顯示環保角色圖鑑 */
+function renderAlbum(){
+  const grid = $("albumGrid");
+
+  if(!session){
+    grid.innerHTML = "";
+    $("collectedCount").textContent = "0";
+    $("albumCount").textContent = "0";
+    return;
+  }
+
+  grid.innerHTML = albumCards.map(card=>{
+    const collected = Number(card.quantity) > 0;
+    const rarity = escapeHTML(card.rarity);
+    const name = collected ? escapeHTML(card.name) : "？？？？";
+    const emoji = collected ? escapeHTML(card.emoji) : "🔒";
+    const description = collected
+      ? escapeHTML(card.description)
+      : "尚未解鎖此角色";
+
+    return `
+      <div class="character-card ${collected?'':'locked-card'}">
+        <span class="character-emoji">${emoji}</span>
+        <strong>${name}</strong>
+        <span class="rarity ${rarity}">${rarity}</span>
+        <p>${description}</p>
+        <p>${collected?'持有：'+Number(card.quantity)+' 張':'尚未收集'}</p>
+        <p>碎片：${Number(card.fragments || 0)}</p>
+      </div>
+    `;
+  }).join("");
+}
+
+/* 抽卡 */
+async function performDraw(drawCount){
+  if(!session){
+    $("drawMessage").textContent = "請先登入玩家帳號。";
+    return;
+  }
+
+  const cost = drawCount === 1 ? 10 : 90;
+
+  if(pointsBalance < cost){
+    $("drawMessage").textContent =
+      "積分不足！目前只有 "+pointsBalance+" 分。";
+    return;
+  }
+
+  if(drawCount === 10 &&
+     !confirm("確定花費 90 分進行十連抽嗎？")){
+    return;
+  }
+
+  $("singleDrawBtn").disabled = true;
+  $("tenDrawBtn").disabled = true;
+  $("drawMessage").textContent = "正在召喚環保角色...";
+  $("drawResults").innerHTML = "";
+
+  try{
+    const {data:result,error} = await supabaseClient.rpc(
+      "draw_player_cards",
+      {
+        p_nickname:session.nickname,
+        p_recovery_code:session.recoveryCode,
+        p_draw_count:drawCount
+      }
+    );
+
+    if(error) throw error;
+    if(!result || !result.success){
+      throw new Error("抽卡沒有成功完成。");
+    }
+
+    pointsBalance = Number(result.points_balance);
+    render();
+
+    const cards = result.cards || [];
+
+    $("drawMessage").textContent =
+      "🎉 抽卡成功！消耗 "+result.points_spent+
+      " 分，剩餘 "+pointsBalance+" 分。";
+
+    $("drawResults").innerHTML = cards.map(card=>{
+      const rarity = escapeHTML(card.rarity);
+      return `
+        <div class="draw-result">
+          <span class="character-emoji">${escapeHTML(card.emoji)}</span>
+          <strong>${escapeHTML(card.name)}</strong>
+          <span class="rarity ${rarity}">${rarity}</span>
+          <small>${card.duplicate?'重複角色：獲得 1 個碎片':'✨ 新角色加入圖鑑！'}</small>
+        </div>
+      `;
+    }).join("");
+
+    await loadPlayerCollection();
+
+  }catch(error){
+    $("drawMessage").textContent = "抽卡失敗："+error.message;
+    console.error(error);
+  }finally{
+    render();
+  }
+}
+
+$("singleDrawBtn").addEventListener("click",()=>{
+  performDraw(1);
+});
+
+$("tenDrawBtn").addEventListener("click",()=>{
+  performDraw(10);
+});
 
 $("registerBtn").addEventListener("click",async()=>{
   const nickname = $("accountNickname").value.trim().slice(0,20);
@@ -345,6 +552,8 @@ $("registerBtn").addEventListener("click",async()=>{
 
     saveSession();
     data = {nickname:nickname,records:{}};
+    pointsBalance = 0;
+    albumCards = [];
 
     $("newCode").textContent = registrationCode;
     $("newCodeBox").hidden = false;
@@ -353,10 +562,10 @@ $("registerBtn").addEventListener("click",async()=>{
 
     updateAccountUI();
     await loadPlayerRecords();
+    await loadPlayerCollection();
 
   }catch(error){
-    $("accountMessage").textContent =
-      "註冊失敗："+error.message;
+    $("accountMessage").textContent = "註冊失敗："+error.message;
     $("registerBtn").disabled = false;
     console.error(error);
   }
@@ -367,8 +576,7 @@ $("loginBtn").addEventListener("click",async()=>{
   const code = $("recoveryCode").value.trim().toUpperCase();
 
   if(!nickname || !code){
-    $("accountMessage").textContent =
-      "請輸入暱稱和專屬玩家代碼。";
+    $("accountMessage").textContent = "請輸入暱稱和專屬玩家代碼。";
     return;
   }
 
@@ -395,14 +603,17 @@ $("loginBtn").addEventListener("click",async()=>{
 
     saveSession();
     data = {nickname:nickname,records:{}};
+    pointsBalance = 0;
+    albumCards = [];
 
     $("newCodeBox").hidden = true;
     updateAccountUI();
+
     await loadPlayerRecords();
+    await loadPlayerCollection();
 
   }catch(error){
-    $("accountMessage").textContent =
-      "登入失敗："+error.message;
+    $("accountMessage").textContent = "登入失敗："+error.message;
     $("loginBtn").disabled = false;
     console.error(error);
   }
@@ -413,8 +624,7 @@ $("copyCodeBtn").addEventListener("click",async()=>{
 
   try{
     await navigator.clipboard.writeText(registrationCode);
-    $("accountMessage").textContent =
-      "玩家代碼已複製，請妥善保存！";
+    $("accountMessage").textContent = "玩家代碼已複製，請妥善保存！";
   }catch(error){
     $("accountMessage").textContent =
       "若無法自動複製，請長按上方代碼手動複製。";
@@ -428,12 +638,18 @@ $("logoutBtn").addEventListener("click",()=>{
   session = null;
   data = {nickname:"",records:{}};
   registrationCode = "";
+  pointsBalance = 0;
+  albumCards = [];
 
   $("newCodeBox").hidden = true;
   $("accountNickname").value = "";
   $("recoveryCode").value = "";
   $("message").textContent = "請先登入玩家帳號。";
+  $("drawMessage").textContent = "請先登入玩家帳號。";
+  $("drawResults").innerHTML = "";
+  $("collectionMessage").textContent = "登入後即可讀取你的收藏。";
 
+  renderAlbum();
   updateAccountUI();
 });
 
@@ -473,12 +689,13 @@ $("saveBtn").addEventListener("click",async()=>{
     saveCache();
     render();
 
-    $("message").textContent =
-      "成功！今日紀錄已儲存至雲端。";
+    $("message").textContent = "成功！今日紀錄已儲存至雲端。";
+
+    // 重新計算最新可用積分
+    await loadPlayerCollection();
 
   }catch(error){
-    $("message").textContent =
-      "儲存失敗："+error.message;
+    $("message").textContent = "儲存失敗："+error.message;
     console.error(error);
   }finally{
     $("saveBtn").disabled = !session;
@@ -503,7 +720,7 @@ $("exportBtn").addEventListener("click",()=>{
   URL.revokeObjectURL(url);
 });
 
-// 啟動網站
+/* 啟動網站 */
 async function startApp(){
   session = readSession();
 
@@ -511,9 +728,11 @@ async function startApp(){
     loadCache();
     data.nickname = session.nickname;
     updateAccountUI();
+
     await loadPlayerRecords();
+    await loadPlayerCollection();
+
   }else{
-    // 只讀取舊暱稱作為參考，不搬動或覆蓋舊紀錄
     try{
       const oldData = JSON.parse(localStorage.getItem(OLD_KEY));
       if(oldData && oldData.nickname){
@@ -522,6 +741,7 @@ async function startApp(){
     }catch(e){}
 
     updateAccountUI();
+    renderAlbum();
     $("message").textContent = "請先登入玩家帳號。";
   }
 }
@@ -530,4 +750,3 @@ startApp();
 </script>
 </body>
 </html>
-
